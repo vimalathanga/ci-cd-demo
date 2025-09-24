@@ -3,10 +3,10 @@ pipeline {
   options { timestamps() }
   triggers { pollSCM('H/5 * * * *') }
 
-  environment {
+environment {
     IMAGE_NAME = 'vimalathanga/ci-cd-demo'
-    DOCKERHUB = credentials('dockerhub-creds')   // Jenkins > Credentials
-  }
+    DOCKERHUB = credentials('vimalathanga')
+}
 
   stages {
     stage('Checkout') {
