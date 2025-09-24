@@ -37,15 +37,15 @@ environment {
       }
     }
 
-    stage('Static Code Analysis') {
-      steps {
-        sh '''
-          . venv/bin/activate
-          pylint sample.py | tee pylint-report.txt || true
-        '''
-        archiveArtifacts artifacts: 'pylint-report.txt', fingerprint: true
-      }
-    }
+stage('Static Code Analysis') {
+  steps {
+    sh '''
+      . venv/bin/activate
+      pylint test_sample.py | tee pylint-report.txt || true
+    '''
+    archiveArtifacts artifacts: 'pylint-report.txt', fingerprint: true
+  }
+}
 
     stage('Docker Build & Push') {
       steps {
