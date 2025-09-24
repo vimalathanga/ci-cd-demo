@@ -3,9 +3,9 @@ pipeline {
   options { timestamps() }
   triggers { pollSCM('H/5 * * * *') }
 
-environment {
+  environment {
     IMAGE_NAME = 'vimalathanga/ci-cd-demo'
-    DOCKERHUB = credentials('vimalathanga')
+    DOCKERHUB = credentials('dockerhub-creds')   // Jenkins > Credentials
   }
 
   stages {
@@ -18,25 +18,31 @@ environment {
     stage('Setup Python & Deps') {
       steps {
         sh '''
-          echo "🔧 Setting up Python environment..."
-          python3 --version
-          pip3 --version || true
-          pip3 install --upgrade pip
-          pip3 install -r requirements.txt
+          echo "🔧 Setting up Python virtual environment..."
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
         '''
       }
     }
 
     stage('Unit Test') {
       steps {
-        sh 'pytest --junitxml=report.xml || true'
+        sh '''
+          . venv/bin/activate
+          pytest --junitxml=report.xml || true
+        '''
         junit 'report.xml'
       }
     }
 
     stage('Static Code Analysis') {
       steps {
-        sh 'pylint sample.py | tee pylint-report.txt || true'
+        sh '''
+          . venv/bin/activate
+          pylint sample.py | tee pylint-report.txt || true
+        '''
         archiveArtifacts artifacts: 'pylint-report.txt', fingerprint: true
       }
     }
