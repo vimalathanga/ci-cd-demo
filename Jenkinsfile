@@ -80,25 +80,35 @@ stage('Static Code Analysis') {
 
 post {
     always {
-        slackSend(
-            channel: '#ci-cd-alerts',
-            color: '#439FE0',
-            message: "📌 Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} started.\nURL: ${env.BUILD_URL}"
-        )
+        sh '''
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \\"text\\": \\"🚀 Job: ${JOB_NAME} Build: ${BUILD_NUMBER} has started. URL: ${BUILD_URL}\\"
+          }" $SLACK_WEBHOOK_URL
+        '''
     }
     success {
-        slackSend(
-            channel: '#ci-cd-alerts',
-            color: 'good',
-            message: "✅ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} finished SUCCESSFULLY.\nURL: ${env.BUILD_URL}"
-        )
+        sh '''
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \\"text\\": \\"✅ Job: ${JOB_NAME} Build: ${BUILD_NUMBER} finished SUCCESSFULLY. URL: ${BUILD_URL}\\"
+          }" $SLACK_WEBHOOK_URL
+        '''
     }
     failure {
-        slackSend(
-            channel: '#ci-cd-alerts',
-            color: 'danger',
-            message: "❌ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} FAILED.\nCheck details: ${env.BUILD_URL}"
-        )
+        sh '''
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \\"text\\": \\"❌ Job: ${JOB_NAME} Build: ${BUILD_NUMBER} FAILED. Check: ${BUILD_URL}\\"
+          }" $SLACK_WEBHOOK_URL
+        '''
     }
 }
 }
+
+environment {
+    IMAGE_NAME = 'vimalathanga/ci-cd-demo'
+    DOCKERHUB = credentials('vimalathanga')
+    SLACK_WEBHOOK_URL = credentials('slack-webhook')
+}
+
