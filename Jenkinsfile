@@ -103,3 +103,4 @@ stage('Static Code Analysis') {
       echo "📌 Build URL: ${env.BUILD_URL}"
     }
   }
+}
