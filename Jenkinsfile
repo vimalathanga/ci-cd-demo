@@ -80,28 +80,31 @@ stage('Static Code Analysis') {
 
 post {
     always {
-        sh '''
-          curl -X POST -H 'Content-type: application/json' \
-          --data "{
-            \\"text\\": \\"🚀 Job: ${JOB_NAME} Build: ${BUILD_NUMBER} has started. URL: ${BUILD_URL}\\"
-          }" $SLACK_WEBHOOK_URL
-        '''
+        withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_WEBHOOK_URL')]) {
+            sh '''
+              curl -X POST -H "Content-type: application/json" \
+              --data "{\\"text\\": \\"🚀 Job: ${JOB_NAME} Build: ${BUILD_NUMBER} started. URL: ${BUILD_URL}\\"}" \
+              $SLACK_WEBHOOK_URL
+            '''
+        }
     }
     success {
-        sh '''
-          curl -X POST -H 'Content-type: application/json' \
-          --data "{
-            \\"text\\": \\"✅ Job: ${JOB_NAME} Build: ${BUILD_NUMBER} finished SUCCESSFULLY. URL: ${BUILD_URL}\\"
-          }" $SLACK_WEBHOOK_URL
-        '''
+        withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_WEBHOOK_URL')]) {
+            sh '''
+              curl -X POST -H "Content-type: application/json" \
+              --data "{\\"text\\": \\"✅ Job: ${JOB_NAME} Build: ${BUILD_NUMBER} SUCCESS. URL: ${BUILD_URL}\\"}" \
+              $SLACK_WEBHOOK_URL
+            '''
+        }
     }
     failure {
-        sh '''
-          curl -X POST -H 'Content-type: application/json' \
-          --data "{
-            \\"text\\": \\"❌ Job: ${JOB_NAME} Build: ${BUILD_NUMBER} FAILED. Check: ${BUILD_URL}\\"
-          }" $SLACK_WEBHOOK_URL
-        '''
+        withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_WEBHOOK_URL')]) {
+            sh '''
+              curl -X POST -H "Content-type: application/json" \
+              --data "{\\"text\\": \\"❌ Job: ${JOB_NAME} Build: ${BUILD_NUMBER} FAILED. Check: ${BUILD_URL}\\"}" \
+              $SLACK_WEBHOOK_URL
+            '''
+        }
     }
 }
 }
