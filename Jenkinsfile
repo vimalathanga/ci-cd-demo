@@ -79,8 +79,27 @@ stage('Static Code Analysis') {
   }
 
   post {
-    success { echo "✅ Pipeline completed successfully" }
-    failure { echo "❌ Pipeline failed" }
-    always  { echo "📌 Build URL: ${env.BUILD_URL}" }
+    success {
+      echo "✅ Pipeline completed successfully"
+      withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
+        sh """
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"✅ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} finished SUCCESSFULLY"}' \
+          $SLACK_URL
+        """
+      }
+    }
+    failure {
+      echo "❌ Pipeline failed"
+      withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
+        sh """
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"❌ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} FAILED. Check logs: ${env.BUILD_URL}"}' \
+          $SLACK_URL
+        """
+      }
+    }
+    always {
+      echo "📌 Build URL: ${env.BUILD_URL}"
+    }
   }
-}
