@@ -78,29 +78,26 @@ stage('Static Code Analysis') {
     }
   }
 
-  post {
+post {
+    always {
+        slackSend(
+            channel: '#ci-cd-alerts',
+            color: '#439FE0',
+            message: "📌 Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} started.\nURL: ${env.BUILD_URL}"
+        )
+    }
     success {
-      echo "✅ Pipeline completed successfully"
-      withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
-        sh """
-          curl -X POST -H 'Content-type: application/json' \
-          --data '{"text":"✅ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} finished SUCCESSFULLY"}' \
-          $SLACK_URL
-        """
-      }
+        slackSend(
+            channel: '#ci-cd-alerts',
+            color: 'good',
+            message: "✅ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} finished SUCCESSFULLY.\nURL: ${env.BUILD_URL}"
+        )
     }
     failure {
-      echo "❌ Pipeline failed"
-      withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
-        sh """
-          curl -X POST -H 'Content-type: application/json' \
-          --data '{"text":"❌ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} FAILED. Check logs: ${env.BUILD_URL}"}' \
-          $SLACK_URL
-        """
-      }
+        slackSend(
+            channel: '#ci-cd-alerts',
+            color: 'danger',
+            message: "❌ Job: ${env.JOB_NAME} Build: ${env.BUILD_NUMBER} FAILED.\nCheck details: ${env.BUILD_URL}"
+        )
     }
-    always {
-      echo "📌 Build URL: ${env.BUILD_URL}"
-    }
-  }
 }
